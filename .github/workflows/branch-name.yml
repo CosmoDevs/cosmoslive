@@ -1,0 +1,17 @@
+name: Validate Branch Name
+on:
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name format
+        run: |
+          BRANCH="${GITHUB_HEAD_REF}"
+          if [[ ! "$BRANCH" =~ ^cl-[0-9]+/[a-z0-9._-]+$ ]]; then
+            echo "🚫 Invalid branch name: $BRANCH"
+            echo "Expected: cl-[issue-number]/[desc]"
+            exit 1
+          fi
