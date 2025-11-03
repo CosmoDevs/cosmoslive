@@ -1,2 +1,9 @@
 npm run lint-staged
 
+branch_name=$(git symbolic-ref --short HEAD)
+
+if [ "$branch_name" = "main" ] || [ "$branch_name" = "staging" ]; then
+  echo "🚫 Commits directly to '$branch_name' are not allowed!"
+  echo "Please work on a feature branch and open a PR."
+  exit 1
+fi

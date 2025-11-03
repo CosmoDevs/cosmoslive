@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "lint-staged": "lint-staged",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "chmod +x .husky/* || true"
   },
   "dependencies": {
     "next": "16.0.1",
