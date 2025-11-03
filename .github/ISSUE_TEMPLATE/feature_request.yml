@@ -1,0 +1,33 @@
+name: 🚀 Feature Request
+description: Suggest a new feature or improvement
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: "Add search bar for space missions"
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why should we add this feature?
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed Solution
+      placeholder: "Describe how it should work or look."
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: I have checked for similar existing feature requests.
+          required: true
