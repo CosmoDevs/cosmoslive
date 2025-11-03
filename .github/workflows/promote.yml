@@ -1,28 +1,12 @@
-name: Promote Staging to Main
+- name: Configure git
+  run: |
+    git config user.name "github-actions"
+    git config user.email "github-actions@github.com"
 
-on:
-  workflow_dispatch:
-  push:
-    branches: [ staging ]
-
-permissions:
-  contents: write
-
-jobs:
-  promote:
-    if: github.ref == 'refs/heads/staging'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Configure git
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-      - name: Merge staging into main
-        run: |
-          git checkout main
-          git merge --no-ff staging -m "chore: promote staging → main"
-          git push origin main
+- name: Merge staging into main
+  env:
+    GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+  run: |
+    git checkout main
+    git merge --no-ff staging -m "chore: promote staging → main"
+    git push https://x-access-token:${GITHUB_TOKEN}@github.com/CosmoDevs/cosmoslive.git main
