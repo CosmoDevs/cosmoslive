@@ -11,3 +11,12 @@ for branch in "${protected_branches[@]}"; do
 done
 
 echo "✅ Push allowed on branch: $branch_name"
+
+pattern="^cl-[0-9]+\/[a-z0-9._-]+$"
+
+if ! echo "$branch_name" | grep -Eq "$pattern"; then
+  echo "🚫 Invalid branch name: '$branch_name'"
+  echo "✅ Use format: cl-[issue-number]/[description]"
+  echo "   e.g. cl-42/add-login-ui"
+  exit 1
+fi
