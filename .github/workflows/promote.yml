@@ -1,12 +1,48 @@
-- name: Configure git
-  run: |
-    git config user.name "github-actions"
-    git config user.email "github-actions@github.com"
+name: Promote Staging to Main
 
-- name: Merge staging into main
-  env:
-    GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-  run: |
-    git checkout main
-    git merge --no-ff staging -m "chore: promote staging → main"
-    git push https://x-access-token:${GITHUB_TOKEN}@github.com/CosmoDevs/cosmoslive.git main
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - staging
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  promote:
+    name: Merge staging into main
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Merge staging into main
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        run: |
+          echo "🔄 Fetching latest branches..."
+          git fetch origin main
+          git fetch origin staging
+
+          echo "🚀 Checking out main branch..."
+          git checkout main
+
+          echo "🔀 Merging staging → main..."
+          git merge --no-ff origin/staging -m "chore: promote staging → main [skip ci]"
+
+          echo "📤 Pushing changes to main..."
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git main
+
+      - name: Done
+        run: echo "✅ Successfully promoted staging → main"
