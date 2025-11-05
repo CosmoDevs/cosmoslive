@@ -13,13 +13,15 @@ const EventForm = () => {
 
   const [errors, setErrors] = useState({});
 
+  /** 🔹 Handle text and date/time input changes */
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
+
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -28,6 +30,7 @@ const EventForm = () => {
     }
   };
 
+  /** 🔹 Handle image uploads */
   const handleImageChange = ({ file, preview, error }) => {
     if (error) {
       setErrors((prev) => ({
@@ -36,10 +39,12 @@ const EventForm = () => {
       }));
       return;
     }
+
     setFormData((prev) => ({
       ...prev,
       image: { file, preview },
     }));
+
     if (errors.image) {
       setErrors((prev) => ({
         ...prev,
@@ -48,8 +53,10 @@ const EventForm = () => {
     }
   };
 
+  /** 🔹 Validate form fields */
   const validateForm = () => {
     const newErrors = {};
+    const now = new Date();
 
     if (!formData.title.trim()) {
       newErrors.title = "Title is required";
@@ -67,9 +74,19 @@ const EventForm = () => {
       newErrors.description = "Description is required";
     }
 
+    // 🔸 Combine and validate date/time
+    if (formData.date && formData.time) {
+      const selectedDateTime = new Date(`${formData.date}T${formData.time}`);
+      if (selectedDateTime < now) {
+        newErrors.date = "Event date/time cannot be in the past";
+        newErrors.time = "Event date/time cannot be in the past";
+      }
+    }
+
     return newErrors;
   };
 
+  /** 🔹 Handle submit event */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -80,12 +97,10 @@ const EventForm = () => {
     }
 
     try {
-      // Format date and time for API
       const datetime = new Date(
         `${formData.date}T${formData.time}`,
       ).toISOString();
 
-      // Create FormData for file upload
       const submitData = new FormData();
       submitData.append("title", formData.title);
       submitData.append("datetime", datetime);
@@ -94,13 +109,9 @@ const EventForm = () => {
         submitData.append("image", formData.image.file);
       }
 
-      // TODO: Replace with your API endpoint
-      // const response = await fetch('/api/events', {
-      //   method: 'POST',
-      //   body: submitData
-      // });
+      alert("Event created successfully!");
 
-      // Clear form on success
+      // Reset form
       setFormData({
         title: "",
         date: "",
@@ -108,9 +119,7 @@ const EventForm = () => {
         description: "",
         image: null,
       });
-
-      // Show success message
-      alert("Event created successfully!");
+      setErrors({});
     } catch (error) {
       console.error("Error creating event:", error);
       setErrors((prev) => ({
@@ -120,6 +129,18 @@ const EventForm = () => {
     }
   };
 
+  /** 🔹 Handle form reset */
+  const handleReset = () => {
+    setFormData({
+      title: "",
+      date: "",
+      time: "",
+      description: "",
+      image: null,
+    });
+    setErrors({});
+  };
+
   return (
     <Card className="max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -127,6 +148,7 @@ const EventForm = () => {
           Create New Event
         </h2>
 
+        {/* Event Title */}
         <Input
           label="Event Title"
           id="title"
@@ -138,6 +160,7 @@ const EventForm = () => {
           required
         />
 
+        {/* Date and Time */}
         <div className="grid grid-cols-2 gap-4">
           <Input
             label="Date"
@@ -148,6 +171,7 @@ const EventForm = () => {
             onChange={handleChange}
             error={errors.date}
             required
+            min={new Date().toISOString().split("T")[0]} // Prevent past dates
           />
 
           <Input
@@ -162,6 +186,7 @@ const EventForm = () => {
           />
         </div>
 
+        {/* Description */}
         <TextArea
           label="Description"
           id="description"
@@ -174,6 +199,7 @@ const EventForm = () => {
           rows={6}
         />
 
+        {/* Image Upload */}
         <ImageUpload
           label="Event Image"
           id="event-image"
@@ -182,25 +208,14 @@ const EventForm = () => {
           error={errors.image}
         />
 
+        {/* Submit Error */}
         {errors.submit && (
           <p className="text-red-500 text-sm">{errors.submit}</p>
         )}
 
+        {/* Buttons */}
         <div className="flex justify-end space-x-4">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              setFormData({
-                title: "",
-                date: "",
-                time: "",
-                description: "",
-                image: null,
-              });
-              setErrors({});
-            }}
-          >
+          <Button type="button" variant="secondary" onClick={handleReset}>
             Reset
           </Button>
 
