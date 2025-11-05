@@ -1,6 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { Button } from "./";
+import { Button } from "@/components/ui";
+
+// Constants to avoid hardcoding
+const DEFAULT_ACCEPT_TYPE = "image/*";
+const MAX_FILE_SIZE_MB = 5;
+const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024; // 5MB
 
 const ImageUpload = ({
   label,
@@ -9,33 +14,41 @@ const ImageUpload = ({
   onChange,
   error,
   required = false,
-  accept = "image/*",
-  maxSize = 5 * 1024 * 1024, // 5MB
+  accept = DEFAULT_ACCEPT_TYPE,
+  maxSize = MAX_FILE_SIZE,
   className = "",
 }) => {
   const [preview, setPreview] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      if (file.size > maxSize) {
-        onChange({
-          error: `File size must be less than ${maxSize / 1024 / 1024}MB`,
-        });
-        return;
-      }
+    if (!file) return;
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result);
-        onChange({ file, preview: reader.result });
-      };
-      reader.readAsDataURL(file);
+    // Validate file size
+    if (file.size > maxSize) {
+      onChange({
+        error: `File size must be less than ${MAX_FILE_SIZE_MB}MB`,
+      });
+      return;
     }
+
+    // Generate preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result);
+      onChange({ file, preview: reader.result, error: null });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemove = () => {
+    setPreview(null);
+    onChange({ file: null, preview: null, error: null });
   };
 
   return (
     <div className={`mb-4 ${className}`}>
+      {/* Label Section */}
       {label && (
         <label
           htmlFor={id}
@@ -46,6 +59,7 @@ const ImageUpload = ({
         </label>
       )}
 
+      {/* Upload Box */}
       <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
         <div className="space-y-1 text-center">
           {preview ? (
@@ -59,10 +73,7 @@ const ImageUpload = ({
                 type="button"
                 variant="secondary"
                 className="mt-2"
-                onClick={() => {
-                  setPreview(null);
-                  onChange({ file: null, preview: null });
-                }}
+                onClick={handleRemove}
               >
                 Remove
               </Button>
@@ -82,6 +93,8 @@ const ImageUpload = ({
                   strokeLinejoin="round"
                 />
               </svg>
+
+              {/* Upload Text & Input */}
               <div className="flex text-sm text-gray-600">
                 <label
                   htmlFor={id}
@@ -100,14 +113,17 @@ const ImageUpload = ({
                 </label>
                 <p className="pl-1">or drag and drop</p>
               </div>
+
+              {/* File Info */}
               <p className="text-xs text-gray-500">
-                PNG, JPG, GIF up to {maxSize / 1024 / 1024}MB
+                PNG, JPG, GIF up to {MAX_FILE_SIZE_MB}MB
               </p>
             </>
           )}
         </div>
       </div>
 
+      {/* Error Message */}
       {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
     </div>
   );

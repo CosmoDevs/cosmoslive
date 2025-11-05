@@ -1,5 +1,5 @@
 import React from "react";
-import EventForm from "@/components/admin/event-form";
+import EventForm from "./component/event-form";
 
 export default function AdminPage() {
   return (
