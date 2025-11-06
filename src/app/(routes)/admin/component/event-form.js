@@ -2,11 +2,10 @@
 
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
+import { string, mixed, object } from "yup";
 import { Input, TextArea, ImageUpload } from "@/components/shared";
 import { Card, Button } from "@/components/ui";
 
-// ✅ Constants for image validation
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
@@ -15,12 +14,11 @@ const ACCEPTED_IMAGE_TYPES = [
   "image/webp",
 ];
 
-// ✅ Yup schema for validation
-const EventSchema = Yup.object().shape({
-  title: Yup.string().trim().required("Title is required"),
-  datetime: Yup.string().required("Date and time are required"),
-  description: Yup.string().trim().required("Description is required"),
-  image: Yup.mixed()
+const EventSchema = object().shape({
+  title: string().trim().required("Title is required"),
+  datetime: string().required("Date and time are required"),
+  description: string().trim().required("Description is required"),
+  image: mixed()
     .required("Image is required")
     .test("fileSize", "File size too large (max 5MB)", (value) =>
       value ? value.size <= MAX_IMAGE_SIZE : false,
@@ -38,6 +36,11 @@ const EventForm = () => {
     image: null,
   };
 
+  const handleImageChange = (e, setFieldValue) => {
+    const file = e.target.files[0];
+    setFieldValue("image", file);
+  };
+
   const handleSubmit = async (
     values,
     { resetForm, setSubmitting, setStatus },
@@ -48,9 +51,6 @@ const EventForm = () => {
       submitData.append("datetime", new Date(values.datetime).toISOString());
       submitData.append("description", values.description);
       submitData.append("image", values.image);
-
-      // TODO: Replace with your actual API endpoint
-      // const response = await fetch('/api/events', { method: 'POST', body: submitData });
 
       resetForm();
       setStatus({ success: "Event created successfully!" });
@@ -126,15 +126,12 @@ const EventForm = () => {
 
             {/* Image Upload */}
             <Field name="image">
-              {({ meta }) => (
+              {({ meta, form }) => (
                 <ImageUpload
                   label="Event Image"
                   id="event-image"
                   name="image"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    setFieldValue("image", file);
-                  }}
+                  onChange={(e) => handleImageChange(e, form.setFieldValue)}
                   error={meta.touched && meta.error ? meta.error : ""}
                   required
                 />
