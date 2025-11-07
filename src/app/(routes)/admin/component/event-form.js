@@ -36,9 +36,18 @@ const EventForm = () => {
     image: null,
   };
 
-  const handleImageChange = (e, setFieldValue) => {
-    const file = e.target.files[0];
-    setFieldValue("image", file);
+  const handleImageChange = (e, setFieldValue, setFieldError) => {
+    // Case 1: Custom object with error (from ImageUpload)
+    if (e && e.error) {
+      setFieldError("image", e.error);
+      return;
+    }
+
+    // Case 2: Normal browser event (real upload)
+    if (e && e.target && e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFieldValue("image", file);
+    }
   };
 
   const handleSubmit = async (
@@ -124,14 +133,15 @@ const EventForm = () => {
               )}
             </Field>
 
-            {/* Image Upload */}
             <Field name="image">
               {({ meta, form }) => (
                 <ImageUpload
                   label="Event Image"
                   id="event-image"
                   name="image"
-                  onChange={(e) => handleImageChange(e, form.setFieldValue)}
+                  onChange={(e) =>
+                    handleImageChange(e, form.setFieldValue, form.setFieldError)
+                  }
                   error={meta.touched && meta.error ? meta.error : ""}
                   required
                 />

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 
-// Constants to avoid hardcoding
+// Constants
 const DEFAULT_ACCEPT_TYPE = "image/*";
 const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024; // 5MB
@@ -20,36 +20,40 @@ const ImageUpload = ({
   className = "",
 }) => {
   const [preview, setPreview] = useState(null);
+  const [localError, setLocalError] = useState("");
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e?.target?.files?.[0];
     if (!file) return;
 
     // Validate file size
     if (file.size > maxSize) {
-      onChange({
-        error: `File size must be less than ${MAX_FILE_SIZE_MB}MB`,
-      });
+      setLocalError(`File size must be less than ${MAX_FILE_SIZE_MB}MB`);
+      setPreview(null);
+      onChange(null); // clear the field value in form
       return;
     }
+
+    // Clear any previous errors
+    setLocalError("");
 
     // Generate preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreview(reader.result);
-      onChange({ file, preview: reader.result, error: null });
+      onChange(e); // pass the event to Formik’s setFieldValue
     };
     reader.readAsDataURL(file);
   };
 
   const handleRemove = () => {
     setPreview(null);
-    onChange({ file: null, preview: null, error: null });
+    setLocalError("");
+    onChange({ target: { files: [null] } }); // mimic file clear
   };
 
   return (
     <div className={`mb-4 ${className}`}>
-      {/* Label Section */}
       {label && (
         <label
           htmlFor={id}
@@ -60,7 +64,6 @@ const ImageUpload = ({
         </label>
       )}
 
-      {/* Upload Box */}
       <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
         <div className="space-y-1 text-center">
           {preview ? (
@@ -82,8 +85,6 @@ const ImageUpload = ({
           ) : (
             <>
               <ArrowUpTrayIcon className="mx-auto h-12 w-12 text-gray-400" />
-
-              {/* Upload Text & Input */}
               <div className="flex text-sm text-gray-600">
                 <label
                   htmlFor={id}
@@ -102,8 +103,6 @@ const ImageUpload = ({
                 </label>
                 <p className="pl-1">or drag and drop</p>
               </div>
-
-              {/* File Info */}
               <p className="text-xs text-gray-500">
                 PNG, JPG, GIF up to {MAX_FILE_SIZE_MB}MB
               </p>
@@ -113,7 +112,9 @@ const ImageUpload = ({
       </div>
 
       {/* Error Message */}
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {(error || localError) && (
+        <p className="mt-1 text-sm text-red-500">{error || localError}</p>
+      )}
     </div>
   );
 };
