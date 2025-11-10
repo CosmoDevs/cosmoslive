@@ -5,6 +5,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { string, mixed, object } from "yup";
 import { Input, TextArea, ImageUpload } from "@/components/shared";
 import { Card, Button } from "@/components/ui";
+import { formStyles } from "@/styles/formStyles";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = [
@@ -150,10 +151,10 @@ const EventForm = () => {
 
             {/* Global status messages */}
             {status?.error && (
-              <p className="text-red-500 text-sm">{status.error}</p>
+              <p className={formStyles.statusError}>{status.error}</p>
             )}
             {status?.success && (
-              <p className="text-green-600 text-sm">{status.success}</p>
+              <p className={formStyles.statusSuccess}>{status.success}</p>
             )}
 
             <div className="flex justify-end space-x-4">
