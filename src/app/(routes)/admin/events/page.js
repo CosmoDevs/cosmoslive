@@ -3,11 +3,13 @@
 import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui";
 import { Button } from "@/components/ui";
+import ReactPaginate from "react-paginate";
+import "./pagination.css"; // new file for styling
 
 export default function EventsPage() {
-  const [events, setEvents] = useState([]); // SSR-safe default
-  const [page, setPage] = useState(1);
+  const [events, setEvents] = useState([]);
   const [pageSize, setPageSize] = useState(6);
+  const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
     const loadEvents = () => {
@@ -22,9 +24,9 @@ export default function EventsPage() {
     setTimeout(loadEvents, 0);
   }, []);
 
-  const totalPages = Math.max(1, Math.ceil(events.length / pageSize));
-  const startIndex = (page - 1) * pageSize;
-  const paginated = events.slice(startIndex, startIndex + pageSize);
+  const offset = currentPage * pageSize;
+  const paginated = events.slice(offset, offset + pageSize);
+  const pageCount = Math.max(1, Math.ceil(events.length / pageSize));
 
   // Format date for UI
   const formatDate = (dateStr) => {
@@ -53,7 +55,7 @@ export default function EventsPage() {
           value={pageSize}
           onChange={(e) => {
             setPageSize(Number(e.target.value));
-            setPage(1);
+            setCurrentPage(0); // reset to first page
           }}
           className="border px-3 py-2 rounded-lg bg-white shadow-sm"
         >
@@ -107,28 +109,19 @@ export default function EventsPage() {
       </div>
 
       {/* PAGINATION FOOTER */}
-      <div className="py-8 flex justify-center items-center gap-10 text-lg font-medium">
-        <Button
-          variant="outline"
-          disabled={page === 1}
-          onClick={() => setPage((p) => p - 1)}
-          className="w-28"
-        >
-          Previous
-        </Button>
-
-        <span className="w-28 text-center">
-          Page {page} / {totalPages}
-        </span>
-
-        <Button
-          variant="outline"
-          disabled={page === totalPages}
-          onClick={() => setPage((p) => p + 1)}
-          className="w-28"
-        >
-          Next
-        </Button>
+      <div className="py-8 flex justify-center">
+        <ReactPaginate
+          previousLabel={"← Previous"}
+          nextLabel={"Next →"}
+          pageCount={pageCount}
+          onPageChange={(sel) => setCurrentPage(sel.selected)}
+          containerClassName={"pagination"}
+          pageLinkClassName={"pagination__link"}
+          previousLinkClassName={"pagination__link"}
+          nextLinkClassName={"pagination__link"}
+          disabledClassName={"pagination__link--disabled"}
+          activeClassName={"pagination__link--active"}
+        />
       </div>
     </div>
   );

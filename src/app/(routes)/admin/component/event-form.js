@@ -67,6 +67,11 @@ const EventForm = () => {
     image: null,
   };
 
+  const handleImageChange = (e, setFieldValue) => {
+    const file = e?.target?.files?.[0] || null;
+    setFieldValue("image", file);
+  };
+
   const handleSubmit = async (
     values,
     { resetForm, setSubmitting, setStatus },
@@ -88,8 +93,8 @@ const EventForm = () => {
 
       resetForm();
       setStatus({ success: "Event created successfully!" });
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       setStatus({ error: "Failed to create event. Please try again." });
     } finally {
       setSubmitting(false);
@@ -162,13 +167,7 @@ const EventForm = () => {
                 <ImageUpload
                   label="Event Image"
                   value={form.values.image}
-                  onChange={(e) => {
-                    if (e?.target?.files?.[0]) {
-                      form.setFieldValue("image", e.target.files[0]);
-                    } else {
-                      form.setFieldValue("image", null);
-                    }
-                  }}
+                  onChange={(e) => handleImageChange(e, form.setFieldValue)}
                   error={meta.touched && meta.error ? meta.error : ""}
                   required
                 />
