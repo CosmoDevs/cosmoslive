@@ -12,6 +12,7 @@
     "postinstall": "chmod +x .husky/* || true"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.35.5",
     "@heroicons/react": "^2.2.0",
     "clsx": "^2.1.1",
     "formik": "^2.4.6",
